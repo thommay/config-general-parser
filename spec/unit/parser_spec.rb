@@ -1,7 +1,4 @@
-require 'rspec'
-require 'parslet/rig/rspec'
-$:.unshift("../../lib")
-require 'config_general_parser/parser'
+require 'spec_helper'
 
 describe ConfigGeneralParser::Parser do
   let(:parser) { ConfigGeneralParser::Parser.new }
