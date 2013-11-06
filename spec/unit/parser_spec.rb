@@ -121,8 +121,10 @@ describe ConfigGeneralParser::Parser do
 
     it "captures all the values from a simple block" do
       parser.block.parse("<foo>\nbar baz\n</foo>\n").should eq(
-        name: [], type: "foo",
-        block: [{key: "bar", val: {string: "baz"}}]
+        block: {
+          name: "", type: "foo",
+          values: [{key: "bar", val: {string: "baz"}}]
+        }
       )
     end
   end

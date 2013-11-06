@@ -34,7 +34,7 @@ module ConfigGeneralParser
     rule(:block_open) {
       spaces? >> str("<") >> str("/").absent? >>
       ( match['[:alnum:]'].repeat.as(:type) >>
-        (spaces? >> match['[:alnum:]'].repeat.as(:name)).maybe).capture(:block_key) >>
+        (spaces? >> match['[:alnum:]'].repeat.maybe.as(:name))).capture(:block_key) >>
       str(">") >> newline
     }
 
@@ -49,7 +49,7 @@ module ConfigGeneralParser
     }
 
     rule(:block) {
-      scope { block_open >> (block | block_line).repeat.as(:block) >> block_end }
+      (scope { block_open >> (block | block_line).repeat.as(:values) >> block_end }).as(:block)
     }
 
     rule(:value) {
