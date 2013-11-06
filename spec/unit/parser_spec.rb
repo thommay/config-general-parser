@@ -56,7 +56,7 @@ describe ConfigGeneralParser::Parser do
 
     it "captures the key and the value" do
       parser.option.parse("foo = bar\n").should eq(
-       option: {key: "foo", val: {string: "bar"}})
+       key: "foo", val: {string: "bar"})
     end
   end
 
@@ -122,7 +122,7 @@ describe ConfigGeneralParser::Parser do
     it "captures all the values from a simple block" do
       parser.block.parse("<foo>\nbar baz\n</foo>\n").should eq(
         name: [], type: "foo",
-        block: [{option: {key: "bar", val: {string: "baz"}}}]
+        block: [{key: "bar", val: {string: "baz"}}]
       )
     end
   end

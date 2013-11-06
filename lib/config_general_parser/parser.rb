@@ -28,7 +28,7 @@ module ConfigGeneralParser
     rule(:option) {
       ( spaces? >> match['[:alnum:]'].repeat.as(:key) >> spaces? >>
         str('=').maybe >> spaces?  >>
-        string.as(:val)).as(:option) >> newline
+        string.as(:val)) >> newline
     }
 
     rule(:block_open) {
