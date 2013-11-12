@@ -57,7 +57,7 @@ module ConfigGeneralParser
     }
 
     rule(:document) {
-      scope { (eof.absent? >> (block | value)).repeat }
+      scope { (eof.absent? >> (block | value)).repeat }.as(:document)
     }
 
     private
