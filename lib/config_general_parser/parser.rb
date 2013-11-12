@@ -10,17 +10,6 @@ module ConfigGeneralParser
     rule(:newline)    { match["\\n"] }
     rule(:eof) { any.absent? }
 
-    rule(:simple_string) {
-      (match['[:alnum:]'] >>
-       (spaces | match['[:alnum:]']).repeat).repeat
-    }
-
-    rule(:string) {
-      (str('"').maybe >> spaces? >>
-      simple_string >> spaces? >>
-      str('"').maybe).as(:string)
-    }
-
     rule(:comment) {
       str('#') >> any.repeat >> newline.maybe
     }
@@ -28,7 +17,7 @@ module ConfigGeneralParser
     rule(:option) {
       ( spaces? >> match['[:alnum:]'].repeat.as(:key) >> spaces? >>
         str('=').maybe >> spaces?  >>
-        string.as(:val)) >> newline
+        (newline.absent? >> any).repeat.as(:val)) >> newline
     }
 
     rule(:block_open) {

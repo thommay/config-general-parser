@@ -3,30 +3,6 @@ require 'spec_helper'
 describe ConfigGeneralParser::Parser do
   let(:parser) { ConfigGeneralParser::Parser.new }
 
-  context "#simple_string" do
-    it "should parse 'a'" do
-      parser.string.should parse('a')
-    end
-
-    it "should parse 'a string'" do
-      parser.string.should parse('a string')
-    end
-  end
-
-  context "#string" do
-    it "should parse a quoted string" do
-      parser.string.should parse('"a string"')
-    end
-
-    it "should parse a quoted string with leading spaces" do
-      parser.string.should parse('" a string"')
-    end
-
-    it "should parse a quoted string with trailing spaces" do
-      parser.string.should parse('"a string "')
-    end
-  end
-
   context "#comment" do
     it "should parse a comment" do
       parser.comment.should parse("#foo\n")
@@ -54,9 +30,12 @@ describe ConfigGeneralParser::Parser do
       parser.option.should parse("foo \"bar\"\n")
     end
 
+    it "should parse a string with funky characters" do
+      parser.option.should parse("foo = \"/etc/init.d/tomcat restart | tee /var/tmp/opman.log\"\n")
+    end
+
     it "captures the key and the value" do
-      parser.option.parse("foo = bar\n").should eq(
-       key: "foo", val: {string: "bar"})
+      parser.option.parse("foo = bar\n").should eq( key: "foo", val: "bar")
     end
   end
 
@@ -118,18 +97,40 @@ describe ConfigGeneralParser::Parser do
                                )
     end
 
+    it "parses a named block" do
+      expect(parser.block).to parse(<<-EOH
+<pool api>
+                                bar baz
+                                foo = caz
+                                </pool api>
+                                EOH
+                               )
+    end
 
     it "captures all the values from a simple block" do
       parser.block.parse("<foo>\nbar baz\n</foo>\n").should eq(
         block: {
           name: "", type: "foo",
-          values: [{key: "bar", val: {string: "baz"}}]
+          values: [{key: "bar", val: "baz"}]
+        }
+      )
+    end
+
+    it "captures all the values from a named block" do
+      parser.block.parse("<pool api>\nbar baz\n</pool api>\n").should eq(
+        block: {
+          name: "api", type: "pool",
+          values: [{key: "bar", val:"baz"}]
         }
       )
     end
   end
 
   context "#document" do
+    it "parses an empty block" do
+      expect(parser.document).to parse("<pool api>\n</pool api>\n")
+    end
+
     it "parses a document starting with a block" do
       parser.document.should parse("<foo>\nfoo bar\n</foo>\n")
     end

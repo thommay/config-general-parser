@@ -4,21 +4,15 @@ describe ConfigGeneralParser::Transformer do
   let (:tform) { ConfigGeneralParser::Transformer.new }
   let (:parser) { ConfigGeneralParser::Parser.new }
 
-  describe "string" do
-    it "should turn a string into a string" do
-      tform.apply(string: "a string").should eq("a string")
-    end
-  end
-
   describe "option" do
     it "should turn an option into a key and a value" do
-      tform.apply(key: "foo", val: {string: "a string"}).should eq("foo" => "a string")
+      tform.apply(key: "foo", val: "a string").should eq("foo" => "a string")
     end
   end
 
   describe "block" do
     it "should turn a simple block into a type, and a hash of options" do
-      tform.apply(block: {name: "", type: "simple", values: [{key: "foo", val: {string: "a string"}}]}).should eq({ "simple" => {"foo" => "a string"}})
+      tform.apply(block: {name: "", type: "simple", values: [{key: "foo", val: "a string"}]}).should eq({ "simple" => {"foo" => "a string"}})
     end
 
     it "should transform a named block into a deeper hash" do
@@ -27,12 +21,12 @@ describe ConfigGeneralParser::Transformer do
     end
 
     it "should transform a list of options correctly" do
-      tform.apply(block: {name: "", type: "simple", values: [{key: "bar", val: {string: "ka"}}, {key: "foo", val: {string: "a string"}}]}).should eq({ "simple" => {"bar" => "ka", "foo" => "a string"}})
+      tform.apply(block: {name: "", type: "simple", values: [{key: "bar", val: "ka"}, {key: "foo", val: "a string"}]}).should eq({ "simple" => {"bar" => "ka", "foo" => "a string"}})
     end
 
     it "should transform a list of options with the same name correctly" do
-      tform.apply(block: {name: "", type: "simple", values: [{key: "foo", val: {string: "ka"}}, {key: "foo", val: {string: "a string"}}]}).should eq({ "simple" => {"foo" => ["ka", "a string"]}})
-      tform.apply(block: {name: "", type: "simple", values: [{key: "foo", val: {string: "zakalwe"}}, {key: "foo", val: {string: "ka"}}, {key: "foo", val: {string: "a string"}}]}).should eq({ "simple" => {"foo" => ["zakalwe", "ka", "a string"]}})
+      tform.apply(block: {name: "", type: "simple", values: [{key: "foo", val: "ka"}, {key: "foo", val: "a string"}]}).should eq({ "simple" => {"foo" => ["ka", "a string"]}})
+      tform.apply(block: {name: "", type: "simple", values: [{key: "foo", val: "zakalwe"}, {key: "foo", val: "ka"}, {key: "foo", val: "a string"}]}).should eq({ "simple" => {"foo" => ["zakalwe", "ka", "a string"]}})
     end
 
     it "should transform a subblock correctly" do

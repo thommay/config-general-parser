@@ -1,6 +1,5 @@
 module ConfigGeneralParser
   class Transformer < Parslet::Transform
-    rule(string: simple(:x)) { x }
 
     rule(key: simple(:key), val: subtree(:val)) do
       { key => val }
