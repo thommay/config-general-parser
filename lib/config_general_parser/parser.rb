@@ -22,15 +22,22 @@ module ConfigGeneralParser
 
     rule(:block_open) {
       spaces? >> str("<") >> str("/").absent? >>
-      ( match['[:alnum:]'].repeat.as(:type) >>
-        (spaces? >> match['[:alnum:]'].repeat.maybe.as(:name))).capture(:block_key) >>
-      str(">") >> newline
+      (str('"').maybe >> match['[^\"> ]'].repeat.as(:type) >> str('"').maybe >>
+        (spaces? >> str('"').maybe >> match['[^\">]'].repeat.maybe.as(:name) >> str('"').maybe)).
+      capture(:block_key) >> str(">") >> newline
     }
 
+    # FIXME: There *HAS* to be a better way to do this
     rule(:block_end) {
-      spaces? >> dynamic do |source, context|
-        str(format_block_end(context.captures[:block_key]))
-      end >> newline
+      spaces? >> str('</') >> str('"').maybe >>
+      dynamic do |_, context|
+        type = context.captures[:block_key][:type]
+        str(type)
+      end >> str('"').maybe >> spaces? >> str('"').maybe >>
+      dynamic do |_, context|
+        name = context.captures[:block_key][:name]
+        str(name)
+      end >> str('"').maybe >> str('>') >> newline
     }
 
     rule(:block_line) {
@@ -49,11 +56,5 @@ module ConfigGeneralParser
       scope { (eof.absent? >> (block | value)).repeat }.as(:document)
     }
 
-    private
-    def format_block_end(hsh)
-      k = "</#{hsh[:type]} "
-      k << "#{hsh[:name]}" if hsh[:name].size > 0
-      k.strip + ">"
-    end
   end
 end

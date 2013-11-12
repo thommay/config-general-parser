@@ -48,10 +48,37 @@ describe ConfigGeneralParser::Parser do
       parser.block_open.should parse("<foo bar>\n")
     end
 
+    it "parses a block with a silly name" do
+      expect(parser.block_open.parse("<foo bar-baz>\n")).to eq(
+        type: "foo", name: "bar-baz")
+    end
+
+    it "parses a block with a quoted type" do
+      expect(parser.block_open).to parse("<\"foo\">\n")
+    end
+
+    it "parses a block with a quoted type and name" do
+      expect(parser.block_open).to parse("<\"foo\" \"bar\">\n")
+    end
+
+    it "parses a block with a quoted type and unqouted name" do
+      expect(parser.block_open).to parse("<\"foo\" bar>\n")
+    end
+
+    it "parses a block with an unquoted type and quoted name" do
+      expect(parser.block_open).to parse("<foo \"bar\">\n")
+    end
+
     it "captures both block and name" do
       parser.block_open.parse("<foo bar>\n").should eq(
         type: "foo", name: "bar")
     end
+
+    it "captures both block and name when quoted" do
+      parser.block_open.parse("<\"foo\" \"bar\">\n").should eq(
+        type: "foo", name: "bar")
+    end
+
   end
 
   context "#block" do
@@ -103,6 +130,16 @@ describe ConfigGeneralParser::Parser do
                                 bar baz
                                 foo = caz
                                 </pool api>
+                                EOH
+                               )
+    end
+
+    it "parses a named block with quoted type" do
+      expect(parser.block).to parse(<<-EOH
+                                <"pool" api>
+                                bar baz
+                                foo = caz
+                                </"pool" api>
                                 EOH
                                )
     end
