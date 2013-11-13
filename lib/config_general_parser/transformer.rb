@@ -2,7 +2,7 @@ module ConfigGeneralParser
   class Transformer < Parslet::Transform
 
     rule(key: simple(:key), val: subtree(:val)) do
-      { key => val }
+      { key => val.to_s.gsub(/\"/, "") }
     end
 
     rule(:block => { :type => simple(:type),
