@@ -33,11 +33,11 @@ module ConfigGeneralParser
     }
 
     rule(:comment) {
-      str('#') >> any.repeat >> newline.maybe
+      str('#') >> (newline.absent? >> any).repeat >> newline.maybe
     }
 
     rule(:option) {
-      ( spaces? >> match['[:alnum:]'].repeat.as(:key) >> spaces? >>
+      ( spaces? >> match['\w'].repeat.as(:key) >> spaces? >>
         str('=').maybe >> spaces?  >>
         (heredoc | (newline.absent? >> any).repeat).as(:val)
       ) >> newline.maybe
@@ -57,10 +57,8 @@ module ConfigGeneralParser
         type = context.captures[:block_key][:type]
         str(type)
       end >> str('"').maybe >> spaces? >> str('"').maybe >>
-      dynamic do |_, context|
-        name = context.captures[:block_key][:name]
-        str(name)
-      end >> str('"').maybe >> str('>') >> newline
+      dynamic { |_, context| str(context.captures[:block_key][:name]) }.maybe >>
+      str('"').maybe >> str('>') >> newline
     }
 
     rule(:block_line) {
