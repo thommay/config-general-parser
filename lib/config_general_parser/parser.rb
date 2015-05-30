@@ -10,6 +10,28 @@ module ConfigGeneralParser
     rule(:newline)    { match["\\n"] }
     rule(:eof) { any.absent? }
 
+    rule(:heredoc_open) {
+      str("<<") >> match('[ \-]').maybe >>
+      (match['[A-Z]'].repeat(1).as(:name) ).
+      capture(:heredoc_key) >> newline
+    }
+
+    rule(:heredoc_end) {
+      spaces? >>
+      dynamic do |_, context|
+        name = context.captures[:heredoc_key][:name]
+        str(name)
+      end >> newline.maybe
+    }
+
+    rule(:heredoc_line) {
+      heredoc_end.absent? >> (newline.absent? >> any).repeat >> newline
+    }
+
+    rule(:heredoc) {
+      (scope { heredoc_open >> heredoc_line.repeat.as(:content) >> heredoc_end }).as(:heredoc)
+    }
+
     rule(:comment) {
       str('#') >> any.repeat >> newline.maybe
     }
@@ -17,7 +39,8 @@ module ConfigGeneralParser
     rule(:option) {
       ( spaces? >> match['[:alnum:]'].repeat.as(:key) >> spaces? >>
         str('=').maybe >> spaces?  >>
-        (newline.absent? >> any).repeat.as(:val)) >> newline
+        (heredoc | (newline.absent? >> any).repeat).as(:val)
+      ) >> newline.maybe
     }
 
     rule(:block_open) {

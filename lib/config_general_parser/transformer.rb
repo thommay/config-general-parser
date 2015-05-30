@@ -5,6 +5,17 @@ module ConfigGeneralParser
       { key => val.to_s.sub(/^\"/, "").chomp("\"") }
     end
 
+    rule(:heredoc => { name: simple(:name),
+                       content: simple(:content) }) do |dict|
+      content = dict[:content].to_s
+      indent = content[/\A[ \t]*/]
+      if indent.length > 0
+        dict[:content].to_s.gsub(/(?<=^)#{indent}/, '')
+      else
+        dict[:content]
+      end
+    end
+
     rule(:block => { :type => simple(:type),
                      :name => simple(:sub),
                      :values => subtree(:values)}) do |dict|

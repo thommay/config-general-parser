@@ -8,6 +8,16 @@ describe ConfigGeneralParser::Transformer do
     it "should turn an option into a key and a value" do
       tform.apply(key: "foo", val: "a string").should eq("foo" => "a string")
     end
+
+    it "should turn a heredoc into a value" do
+      tform.apply(key: "foo", val: { heredoc: { name: "FOO", content: "a string\n" }}).should eq("foo" => "a string\n")
+    end
+  end
+
+  describe "heredoc" do
+    it "should turn a heredoc block into a string" do
+      tform.apply(heredoc: { name: "FOO", content: "a string\n" }).should eq("a string\n")
+    end
   end
 
   describe "block" do
