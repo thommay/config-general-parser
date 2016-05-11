@@ -34,8 +34,45 @@ describe ConfigGeneralParser::Parser do
       parser.option.should parse("foo = \"/etc/init.d/tomcat restart | tee /var/tmp/opman.log\"\n")
     end
 
+    it "should parse a heredoc string" do
+      parser.option.parse("foo <<FOO\nvalues\nFOO\n").should eq(
+        key: "foo", val: { heredoc: { name: "FOO", content: "values\n" }})
+    end
+
     it "captures the key and the value" do
       parser.option.parse("foo = bar\n").should eq( key: "foo", val: "bar")
+    end
+  end
+
+  context "#heredoc_open" do
+    it "parses a simple heredoc" do
+      parser.heredoc_open.should parse("<<EOF\n")
+    end
+
+    it "captures heredoc name" do
+      expect(parser.heredoc_open.parse("<<EOF\n")).to eq(
+        name: "EOF")
+    end
+  end
+
+  context "#heredoc" do
+    it "parses heredoc" do
+      parser.heredoc.should parse(<<-EOH
+<<HERE
+value
+value2
+HERE
+EOH
+)
+    end
+
+    it "captures heredoc options" do
+      expect(parser.heredoc.parse("<<HERE\nvalue 1\nvalue 2\nHERE\n")).to eq(
+        heredoc: {
+          name: "HERE",
+          content: "value 1\nvalue 2\n"
+        }
+      )
     end
   end
 
